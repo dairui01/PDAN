@@ -1,5 +1,6 @@
 # PDAN
-Implementation for the paper "PDAN: Pyramid Dilated Attention Network for Action Detection".
+Implementation for the paper "PDAN: Pyramid Dilated Attention Network for Action Detection" in WACV2021.
+
 The code is tested in Python3.7 + PyTorch1.2 environment. 
 
 For testing this code, please follow this [repository](https://github.com/piergiaj/pytorch-i3d) for extracting the snippet-level I3D feature.

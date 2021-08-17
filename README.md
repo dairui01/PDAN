@@ -5,7 +5,7 @@ The code is tested in Python3.7 + PyTorch1.2 environment and the overall code fr
 
 For training and testing this code, please download the Charades dataset from this [link](https://prior.allenai.org/projects/charades) and follow this [repository](https://github.com/piergiaj/pytorch-i3d) to extract the snippet-level I3D feature.
 
-If you find this dataset useful for your research, please cite our [paper](https://openaccess.thecvf.com/content/WACV2021/html/Dai_PDAN_Pyramid_Dilated_Attention_Network_for_Action_Detection_WACV_2021_paper.html):
+If you find this work useful for your research, please cite our [paper](https://openaccess.thecvf.com/content/WACV2021/html/Dai_PDAN_Pyramid_Dilated_Attention_Network_for_Action_Detection_WACV_2021_paper.html):
 
     @InProceedings{Dai_2021_WACV,
         author    = {Dai, Rui and Das, Srijan and Minciullo, Luca and Garattoni, Lorenzo and Francesca, Gianpiero and Bremond, Francois},

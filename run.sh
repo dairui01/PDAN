@@ -9,7 +9,6 @@ python train.py \
 -train True \
 -num_channel 512 \
 -lr 0.001 \
--kernelsize 9 \
 -comp_info charades_PDAN \
 -APtype map \
 -epoch 100 \

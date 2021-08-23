@@ -90,10 +90,10 @@ if args.dataset == 'charades':
     if args.run_mode == 'debug':
         print('debug!!!')
         train_split = './data/charades_test.json'
-        test_split = '/data/stars/user/rdai/PhD_work/CVPR2021_match/data/charades_test.json'
+        test_split = './data/charades_test.json'
     else:
         train_split = './data/charades.json'
-        test_split = './charades.json'
+        test_split = './data/charades.json'
     # print('load feature from:', args.rgb_root)
     rgb_root = '/Path/to/charades_feat_rgb'
     skeleton_root = '/Path/to/charades_feat_pose'

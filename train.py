@@ -38,6 +38,8 @@ parser.add_argument('-randomseed', type=str, default='False')
 parser.add_argument('-load_model', type=str, default='False')
 parser.add_argument('-batch_size', type=str, default='False')
 parser.add_argument('-num_channel', type=str, default='False')
+parser.add_argument('-run_mode', type=str, default='False')
+parser.add_argument('-feat', type=str, default='False')
 
 args = parser.parse_args()
 

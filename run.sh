@@ -8,7 +8,7 @@ python train.py \
 -model PDAN \
 -train True \
 -num_channel 512 \
--lr 0.001 \
+-lr 0.0002 \
 -comp_info charades_PDAN \
 -APtype map \
 -epoch 100 \

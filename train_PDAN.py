@@ -100,7 +100,7 @@ if args.dataset == 'charades':
         train_split = './data/charades.json'
         test_split = './data/charades.json'
     # print('load feature from:', args.rgb_root)
-    rgb_root = '/data/stars/user/rdai/PhD_work/cvpr2020/Charades_v1/charades_feat_rgb'
+    rgb_root = '/Path/to/charades_feat_rgb'
     skeleton_root = '/Path/to/charades_feat_pose'
     flow_root = '/Path/to/charades_feat_flow'
     rgb_of=[rgb_root,flow_root]

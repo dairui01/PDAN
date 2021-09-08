@@ -89,7 +89,6 @@ class DAL(nn.Module):
         init.kaiming_normal(self.key_conv.weight, mode='fan_out')
         init.kaiming_normal(self.value_conv.weight, mode='fan_out')
         init.kaiming_normal(self.query_conv.weight, mode='fan_out')
-
         init.normal(self.rel_t, 0, 1)
 
 

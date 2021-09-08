@@ -38,7 +38,6 @@ class SSPDAN(nn.Module):
 class PDAN_Block(nn.Module):
     def __init__(self, dilation, in_channels, out_channels):
         super(PDAN_Block, self).__init__()
-        # self.conv_dilated = nn.Conv1d(in_channels, out_channels, 3, padding=dilation, dilation=dilation)
         self.conv_attention=DAL(in_channels, out_channels, kernel_size=3, padding=dilation, dilated=dilation)
         self.conv_1x1 = nn.Conv1d(out_channels, out_channels, 1)
         self.dropout = nn.Dropout()

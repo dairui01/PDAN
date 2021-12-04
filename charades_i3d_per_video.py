@@ -78,7 +78,11 @@ class MultiThumos(data_utl.Dataset):
         else:
             # print('here')
             feat = np.load(os.path.join(self.root, entry[0]+'.npy'))
-            # print(feat.shape[-1])
+            # print('\n\n\n', os.path.join(self.root, entry[0]+'.npy'), '\n')
+            # print('feat.shape', feat.shape)
+            # print('feat[0][0]', feat[0][0])
+            # print('feat[0]', feat[0])
+            #TODO:fix dimensions 10x smaller
             feat = feat.reshape((feat.shape[0],1,1,feat.shape[-1]))
             feat = feat.astype(np.float32)
 
@@ -93,6 +97,14 @@ class MultiThumos(data_utl.Dataset):
 def mt_collate_fn(batch):
     "Pads data and puts it into a tensor of same dimensions"
     max_len = 0
+    # print('type(batch', type(batch))
+    # print('batch.shape', np.shape(batch))
+    # print('len(batch[0])', len(batch[0]))
+    # print('batch[0][0].shape', batch[0][0].shape)
+    # print('len(batch[1])', len(batch[1]))
+    # print('batch[0][1].shape', batch[0][1].shape)
+    # print('batch[0][1][0]', batch[0][1][0])
+    # print('batch[0][1][0]', batch[0][1][0])
     for b in batch:
         if b[0].shape[0] > max_len:
             max_len = b[0].shape[0]
@@ -104,7 +116,7 @@ def mt_collate_fn(batch):
         l = np.zeros((max_len, b[1].shape[1]), np.float32)
         f[:b[0].shape[0]] = b[0]
         m[:b[0].shape[0]] = 1
-        l[:b[0].shape[0], :] = b[1]
+        l[:b[1].shape[0], :] = b[1]
         new_batch.append([video_to_tensor(f), torch.from_numpy(m), torch.from_numpy(l), b[2]])
 
     return default_collate(new_batch)

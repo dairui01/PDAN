@@ -43,6 +43,7 @@ parser.add_argument('-feat', type=str, default='False')
 
 
 args = parser.parse_args()
+print(args)
 
 import torch
 import torch.nn as nn
@@ -50,6 +51,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import random
+
+
+from utils import *
 
 # set random seed
 if args.randomseed=="False":
@@ -100,10 +104,10 @@ if args.dataset == 'charades':
         train_split = './data/charades.json'
         test_split = './data/charades.json'
     # print('load feature from:', args.rgb_root)
-    rgb_root = '/Path/to/charades_feat_rgb'
-    skeleton_root = '/Path/to/charades_feat_pose'
-    flow_root = '/Path/to/charades_feat_flow'
-    rgb_of=[rgb_root,flow_root]
+    # rgb_root = '/Path/to/charades_feat_rgb'
+    # skeleton_root = '/Path/to/charades_feat_pose'
+    # flow_root = '/Path/to/charades_feat_flow'
+    # rgb_of=[rgb_root,flow_root]
     classes = 157
 
 
@@ -115,7 +119,8 @@ def load_data(train_split, val_split, root):
             dataset = Dataset(train_split, 'training', root, batch_size, classes, int(args.pool_step))
         else:
             dataset = Dataset(train_split, 'training', root, batch_size, classes)
-        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8,
+        #TODO: 8 workers
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=1,
                                                  pin_memory=True, collate_fn=collate_fn)
         dataloader.root = root
     else:
@@ -127,7 +132,8 @@ def load_data(train_split, val_split, root):
         val_dataset = Dataset(val_split, 'testing', root, batch_size, classes, int(args.pool_step))
     else:
         val_dataset = Dataset(val_split, 'testing', root, batch_size, classes)
-    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=2,
+    #TODO: 2 workers
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=1,
                                                  pin_memory=True, collate_fn=collate_fn)
     val_dataloader.root = root
 
@@ -151,10 +157,17 @@ def run(models, criterion, num_epochs=50):
             probs.append(prob_val)
             sched.step(val_loss)
 
+    print('\n\n len probs', len(probs))
+    print('\n\n type probs 0', type(probs))
+    print('\n\n len(probs[0])', len(probs[0]))
+    print('\n\n shape probs[0]', np.shape(probs[0]))
 
 def eval_model(model, dataloader, baseline=False):
     results = {}
     for data in dataloader:
+        # print(type(data), 'type data\n\n')
+        # print(data, ' data\n\n')
+        # print(len(data), 'len data\n\n')
         other = data[3]
         outputs, loss, probs, _ = run_network(model, data, 0, baseline)
         fps = outputs.size()[1] / other[1][0]
@@ -188,7 +201,7 @@ def run_network(model, data, gpu, epoch=0, baseline=False):
     outputs_final = outputs_final[-1]
     #print("outputs_final",outputs_final.size())
     outputs_final = outputs_final.permute(0, 2, 1)  
-    probs_f = F.sigmoid(outputs_final) * mask.unsqueeze(2)
+    probs_f = torch.sigmoid(outputs_final) * mask.unsqueeze(2)
     loss_f = F.binary_cross_entropy_with_logits(outputs_final, labels, size_average=False)
     loss_f = torch.sum(loss_f) / torch.sum(mask)  
 
@@ -217,6 +230,8 @@ def train_step(model, gpu, optimizer, dataloader, epoch):
 
         loss.backward()
         optimizer.step()
+        
+        writer.add_scalar('Accuracy/train',  100 * apm.value(), num_iter)
     if args.APtype == 'wap':
         train_map = 100 * apm.value()
     else:
@@ -254,7 +269,8 @@ def val_step(model, gpu, dataloader, epoch):
         probs = probs.squeeze()
 
         full_probs[other[0][0]] = probs.data.cpu().numpy().T
-
+        
+        writer.add_scalar('Accuracy/test',  torch.sum(100 * apm.value()) / torch.nonzero(100 * apm.value()).size()[0], num_iter)
     epoch_loss = tot_loss / num_iter
 
 
@@ -278,8 +294,8 @@ if __name__ == '__main__':
         print('Pose mode', skeleton_root)
         dataloaders, datasets = load_data(train_split, test_split, skeleton_root)
     elif args.mode == 'rgb':
-        print('RGB mode', rgb_root)
-        dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        print('RGB mode', args.rgb_root)
+        dataloaders, datasets = load_data(train_split, test_split, args.rgb_root)
 
     if args.train:
         num_channel = args.num_channel
@@ -298,7 +314,7 @@ if __name__ == '__main__':
             stage=1
             block=5
             num_channel=512
-            input_channnel=1024
+            input_channnel=2048
             num_classes=classes
             rgb_model = PDAN(stage, block, num_channel, input_channnel, num_classes)
             pytorch_total_params = sum(p.numel() for p in rgb_model.parameters() if p.requires_grad)
@@ -311,8 +327,35 @@ if __name__ == '__main__':
         rgb_model=torch.nn.DataParallel(rgb_model)
 
         if args.load_model!= "False":
-            rgb_model.load_state_dict(torch.load(str(args.load_model)))
-            print("loaded",args.load_model)
+            # rgb_model.load_state_dict(torch.load(str(args.load_model)))
+            # rgb_model.load_state_dict(torch.load(str(args.load_model)).module.state_dict())
+            # print("loaded",args.load_model)
+            #rgb_model = torch.load(str(args.load_model)).module.state_dict()
+			# original saved file with DataParallel
+            state_dict = torch.load(str(args.load_model))
+			# create new OrderedDict that does not contain `module.`
+            # from collections import OrderedDict
+            # new_state_dict = OrderedDict()
+            # print(state_dict)
+            # print(type(state_dict))
+            # for k, v in state_dict.items():
+                # name = k[7:] # remove `module.`
+                # new_state_dict[name] = v
+			# # load params
+            # rgb_model.load_state_dict(new_state_dict)
+				
+			
+			
+			# # original saved file with DataParallel
+			# state_dict = torch.load(str(args.load_model))
+			# # create new OrderedDict that does not contain `module.`
+			# from collections import OrderedDict
+			# new_state_dict = OrderedDict()
+			# for k, v in state_dict.items():
+				# name = k[7:] # remove `module.`
+				# new_state_dict[name] = v
+			# # load params
+			# model.load_state_dict(new_state_dict)
 
         pytorch_total_params = sum(p.numel() for p in rgb_model.parameters() if p.requires_grad)
         print('pytorch_total_params', pytorch_total_params)
@@ -321,9 +364,17 @@ if __name__ == '__main__':
 
         criterion = nn.NLLLoss(reduce=False)
         lr = float(args.lr)
-        print(lr)
+        print('lr', lr)
         optimizer = optim.Adam(rgb_model.parameters(), lr=lr)
         lr_sched = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=8, verbose=True)
+        print(type(rgb_model), 'type model')
         run([(rgb_model, 0, dataloaders, optimizer, lr_sched, args.comp_info)], criterion, num_epochs=int(args.epoch))
 
+        
+        print(type(rgb_model), 'type model')
+        results = eval_model([(rgb_model, 0, dataloaders, optimizer, lr_sched, args.comp_info)], dataloaders['val'])
+        with open('./output/results.txt', 'w') as file:
+            file.write(json.dumps(results)) # use `json.loads` to do the reverse
+        
+        torch.save(rgb_model, './output/rgb_model.pt')
 

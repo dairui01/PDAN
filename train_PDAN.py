@@ -7,7 +7,6 @@ import sys
 import torchvision.models as models
 import torch
 
-# sys.path.append('/data/stars/user/rdai/PhD_work/Graph_net')
 
 
 def str2bool(v):
@@ -77,13 +76,7 @@ import json
 import pickle
 import math
 
-
-
-if str(args.APtype) == 'wap':
-    pass
-    #from wapmeter import APMeter
-elif str(args.APtype) == 'map':
-    from apmeter import APMeter
+from apmeter import APMeter
 
 
 batch_size = int(args.batch_size)

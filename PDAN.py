@@ -15,6 +15,7 @@ class PDAN(nn.Module):
     def forward(self, x, mask):
         out = self.stage1(x, mask)
         outputs = out.unsqueeze(0)
+        #doesn do anything
         for s in self.stages:
             out = s(out * mask[:, 0:1, :], mask)
             outputs = torch.cat((outputs, out.unsqueeze(0)), dim=0)
@@ -26,11 +27,14 @@ class SSPDAN(nn.Module):
         self.conv_1x1 = nn.Conv1d(dim, num_f_maps, 1)
         self.layers = nn.ModuleList([copy.deepcopy(PDAN_Block(2 ** i, num_f_maps, num_f_maps)) for i in range(num_layers)])
         self.conv_out = nn.Conv1d(num_f_maps, num_classes, 1)
+        #TODO: change to linear, but it should work worse
+        #self.conv_out = nn.Linear(num_f_maps, num_classes)
 
     def forward(self, x, mask):
         out = self.conv_1x1(x)
         for layer in self.layers:
             out = layer(out, mask)
+        #out = nn.Transformer(out, mask)
         out = self.conv_out(out) * mask[:, 0:1, :]
         return out
 
@@ -46,6 +50,7 @@ class PDAN_Block(nn.Module):
         out = F.relu(self.conv_attention(x))
         out = self.conv_1x1(out)
         out = self.dropout(out)
+        #return out * mask[:, 0:1, :]
         return (x + out) * mask[:, 0:1, :]
 
 class DAL(nn.Module):
@@ -70,13 +75,17 @@ class DAL(nn.Module):
         padded_x = F.pad(x, (self.padding, self.padding))
         q_out = self.query_conv(x)
         k_out = self.key_conv(padded_x)
-        v_out = self.value_conv(padded_x)
+        # v_out = self.value_conv(padded_x)
         kernal_size = 2*self.dilated + 1
+        #print(k_out.shape)
         k_out = k_out.unfold(2, kernal_size, self.stride)  # unfold(dim, size, step)
+        #print(k_out.shape)
         k_out=torch.cat((k_out[:,:,:,0].unsqueeze(3),k_out[:,:,:,0+self.dilated].unsqueeze(3),k_out[:,:,:,0+2*self.dilated].unsqueeze(3)),dim=3)  #dilated
-        v_out = v_out.unfold(2, kernal_size, self.stride)
-        v_out=torch.cat((v_out[:,:,:,0].unsqueeze(3),v_out[:,:,:,0+self.dilated].unsqueeze(3),v_out[:,:,:,0+2*self.dilated].unsqueeze(3)),dim=3)  #dilated
-        v_out = v_out + self.rel_t
+        #print(k_out.shape,'\n\n')
+        # v_out = v_out.unfold(2, kernal_size, self.stride)
+        # v_out=torch.cat((v_out[:,:,:,0].unsqueeze(3),v_out[:,:,:,0+self.dilated].unsqueeze(3),v_out[:,:,:,0+2*self.dilated].unsqueeze(3)),dim=3)  #dilated
+        # v_out = v_out + self.rel_t
+        v_out = k_out + self.rel_t
         k_out = k_out.contiguous().view(batch, self.groups, self.out_channels // self.groups, time, -1)
         v_out = v_out.contiguous().view(batch, self.groups, self.out_channels // self.groups, time, -1)
         q_out = q_out.view(batch, self.groups, self.out_channels // self.groups, time, 1)

@@ -1,6 +1,4 @@
 
-*.txt
-output/baseline/rgb_model.pt
-runs/baseline_100_epochs/events.out.tfevents.1638561314.DESKTOP-ELNFG1N
-runs/baseline_early_stop/events.out.tfevents.1638547380.DESKTOP-ELNFG1N
 *.pyc
+models/PDAN_Charades_RGB
+models/PDAN_Charades_RGB - ori

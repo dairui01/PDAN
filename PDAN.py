@@ -66,7 +66,7 @@ class DAL(nn.Module):
         self.rel_t = nn.Parameter(torch.randn(out_channels, 1, kernel_size), requires_grad=True)
         self.key_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
         self.query_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
-        self.value_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
+        #self.value_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
         self.reset_parameters()
 
 
@@ -96,7 +96,7 @@ class DAL(nn.Module):
 
     def reset_parameters(self):
         init.kaiming_normal(self.key_conv.weight, mode='fan_out')
-        init.kaiming_normal(self.value_conv.weight, mode='fan_out')
+        #init.kaiming_normal(self.value_conv.weight, mode='fan_out')
         init.kaiming_normal(self.query_conv.weight, mode='fan_out')
         init.normal(self.rel_t, 0, 1)
 

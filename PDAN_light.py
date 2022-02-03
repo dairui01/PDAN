@@ -50,6 +50,7 @@ class PDAN_Block(nn.Module):
         out = F.relu(self.conv_attention(x))
         out = self.conv_1x1(out)
         out = self.dropout(out)
+        #return out * mask[:, 0:1, :]
         return (x + out) * mask[:, 0:1, :]
 
 class DAL(nn.Module):
@@ -66,7 +67,7 @@ class DAL(nn.Module):
         #self.linear = nn.Linear(in_channels, out_channels)
         self.key_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
         self.query_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
-        self.value_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
+        #self.value_conv = nn.Conv1d(in_channels, out_channels, kernel_size=1, bias=bias)
         self.reset_parameters()
 
 
@@ -75,12 +76,17 @@ class DAL(nn.Module):
         padded_x = F.pad(x, (self.padding, self.padding))
         q_out = self.query_conv(x)
         k_out = self.key_conv(padded_x)
-        v_out = self.value_conv(padded_x)
+        # v_out = self.value_conv(padded_x)
         kernal_size = 2*self.dilated + 1
+        #print(k_out.shape)
         k_out = k_out.unfold(2, kernal_size, self.stride)  # unfold(dim, size, step)
+        #print(k_out.shape)
         k_out=torch.cat((k_out[:,:,:,0].unsqueeze(3),k_out[:,:,:,0+self.dilated].unsqueeze(3),k_out[:,:,:,0+2*self.dilated].unsqueeze(3)),dim=3)  #dilated
-        v_out = v_out.unfold(2, kernal_size, self.stride)
-        v_out=torch.cat((v_out[:,:,:,0].unsqueeze(3),v_out[:,:,:,0+self.dilated].unsqueeze(3),v_out[:,:,:,0+2*self.dilated].unsqueeze(3)),dim=3)  #dilated
+        #print(k_out.shape,'\n\n')
+        # v_out = v_out.unfold(2, kernal_size, self.stride)
+        # v_out=torch.cat((v_out[:,:,:,0].unsqueeze(3),v_out[:,:,:,0+self.dilated].unsqueeze(3),v_out[:,:,:,0+2*self.dilated].unsqueeze(3)),dim=3)  #dilated
+        # print(self.rel_t.shape)
+        # print(k_out.shape)
         #TODO: I could do this afterwards, but have to be careful with dimensions. Just moving it lower decreases performance and increases overfitting
         v_out = k_out + self.rel_t
         #v_out = self.linear(k_out)
@@ -94,7 +100,7 @@ class DAL(nn.Module):
 
     def reset_parameters(self):
         init.kaiming_normal(self.key_conv.weight, mode='fan_out')
-        init.kaiming_normal(self.value_conv.weight, mode='fan_out')
+        #init.kaiming_normal(self.value_conv.weight, mode='fan_out')
         init.kaiming_normal(self.query_conv.weight, mode='fan_out')
         #init.kaiming_normal(self.linear.weight, mode='fan_out')
         init.normal(self.rel_t, 0, 1)

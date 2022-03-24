@@ -8,7 +8,7 @@ For training and testing this code, please download the Charades dataset from th
 
 
 If you find this work useful for your research, please cite our [paper](https://openaccess.thecvf.com/content/WACV2021/html/Dai_PDAN_Pyramid_Dilated_Attention_Network_for_Action_Detection_WACV_2021_paper.html):
-
+```bibtex
     @InProceedings{Dai_2021_WACV,
         author    = {Dai, Rui and Das, Srijan and Minciullo, Luca and Garattoni, Lorenzo and Francesca, Gianpiero and Bremond, Francois},
         title     = {PDAN: Pyramid Dilated Attention Network for Action Detection},
@@ -17,6 +17,6 @@ If you find this work useful for your research, please cite our [paper](https://
         year      = {2021},
         pages     = {2970-2979}
     }
-
+```
 Contact: rui.dai@inria.fr
 

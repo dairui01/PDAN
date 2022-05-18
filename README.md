@@ -1,4 +1,4 @@
-# PDAN
+# [WACV2021] PDAN
 Implementation for the paper ["PDAN: Pyramid Dilated Attention Network for Action Detection"](https://openaccess.thecvf.com/content/WACV2021/html/Dai_PDAN_Pyramid_Dilated_Attention_Network_for_Action_Detection_WACV_2021_paper.html).
 
 The code is tested in Python3.7 + PyTorch1.2 environment with one Tesla V100 GPU and the overall code framework is adapted from the [Superevent](https://github.com/piergiaj/super-events-cvpr18).
